@@ -1,0 +1,8 @@
+bin/
+pkg/
+rocksdb-*/
+sop-*.tar.gz
+sop-*/
+src/
+v*.tar.gz
+

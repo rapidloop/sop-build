@@ -37,9 +37,19 @@ deps: src
 	export GOPATH=`pwd`; cd src/$(REPO_GO); $(DEP) ensure -v -vendor-only
 
 build: rocksdb-$(ROCKSDB_VER)/librocksdb.a deps
+	$(eval VERSION := $(shell cat src/$(REPO_GO)/VERSION))
 	GOPATH=`pwd` CGO_CFLAGS="-I`pwd`/rocksdb-$(ROCKSDB_VER)/include" \
 	       CGO_LDFLAGS="-L`pwd`/rocksdb-$(ROCKSDB_VER) -lrocksdb -lstdc++ -lm -lz -lbz2 -lsnappy -llz4 -lzstd" \
-	       $(GO) install -v --ldflags '-extldflags "-static"' $(REPO_GO)/...
+	       $(GO) install -v \
+		   -ldflags '-X main.VERSION=$(VERSION) -s -w -extldflags "-static"' \
+		   $(REPO_GO)/...
+
+dist: clobber build
+	$(eval VERSION := $(shell cat src/$(REPO_GO)/VERSION))
+	rm -rf sop-$(VERSION)
+	mkdir sop-$(VERSION)
+	cp bin/sop sop-$(VERSION)
+	tar cvzf sop-$(VERSION).tar.gz sop-$(VERSION)
 
 clean:
 	rm -rf bin pkg
